@@ -13,12 +13,16 @@ const searchUnions = async (req, res) => {
 
     const workplaceQuery = {};
 
+    // Handle location query (for zip, state, or country)
     if (location) {
-        const [city, state] = location.split(',').map(part => part.trim());
-        if (city) workplaceQuery.city = { [Op.iLike]: `%${city}%` };
-        if (state) workplaceQuery.state = { [Op.iLike]: `%${state}%` };
+        workplaceQuery[Op.or] = [
+            { zip: { [Op.iLike]: `%${location}%` } },
+            { state: { [Op.iLike]: `%${location}%` } },
+            { country: { [Op.iLike]: `%${location}%` } }
+        ];
     }
 
+    // Handle organization query
     if (organization) {
         workplaceQuery.organization = { [Op.iLike]: `%${organization}%` };
     }
@@ -26,12 +30,14 @@ const searchUnions = async (req, res) => {
     try {
         const unions = await union.findAll({
             where: unionQuery,
-            include: [{
-                model: workplace,
-                as: 'associatedWorkplaces',  
-                where: workplaceQuery,
-                required: true  
-            }]
+            include: [
+                {
+                    model: workplace,
+                    as: 'associatedWorkplaces',
+                    where: workplaceQuery,
+                    required: true
+                }
+            ]
         });
 
         res.status(200).json({ status: 'success', data: unions });

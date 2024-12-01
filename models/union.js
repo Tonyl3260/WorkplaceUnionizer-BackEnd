@@ -5,13 +5,25 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class union extends Model {
     static associate(models) {
-      union.hasMany(models.chat, { foreignKey: 'unionId' });
+      union.hasMany(models.chat, {
+        foreignKey: 'unionId',
+        as: 'chats',
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
+      });
+
       union.belongsToMany(models.user, {
         through: 'user_unions',
         foreignKey: 'unionId',
-        otherKey: 'userId'
+        otherKey: 'userId',
+        as: 'members',
       });
-      union.hasMany(models.workplace, { foreignKey: 'unionId', as: 'associatedWorkplaces' });
+
+      union.hasMany(models.workplace, {
+        foreignKey: 'unionId',
+        as: 'associatedWorkplaces',
+        onUpdate: 'CASCADE',
+      });
     }
   }
 
@@ -47,31 +59,29 @@ module.exports = (sequelize, DataTypes) => {
           const Chat = sequelize.models.chat;
           const UserUnion = sequelize.models.user_union;
 
-          // Ensure we only proceed if userId is available
           if (!userId) {
-            console.warn("Warning: User ID not provided in afterCreate hook options.");
+            console.warn('Warning: User ID not provided in afterCreate hook options.');
             return;
           }
 
           try {
-            // Use the transaction passed in options, or create a new one
-            const transaction = options.transaction || await sequelize.transaction();
+            const transaction = options.transaction || (await sequelize.transaction());
 
             // Create a general chat for the union
-            const newChat = await Chat.create(
+            await Chat.create(
               {
                 id: uuidv4(),
-                name: `${union.name} general chat`,
+                name: `${union.name} General Chat`,
                 unionId: union.id,
                 createdAt: new Date(),
                 updatedAt: new Date(),
               },
               { transaction }
             );
-            console.log(`Hook triggered: Chat for ${union.name} created`);
+            console.log(`General chat created for union: ${union.name}`);
 
-            // Create user_union association with admin role
-            const newUserUnion = await UserUnion.create(
+            // Add user to union with admin role
+            await UserUnion.create(
               {
                 id: uuidv4(),
                 userId,
@@ -80,13 +90,13 @@ module.exports = (sequelize, DataTypes) => {
               },
               { transaction }
             );
-            console.log(`User ${userId} added to union ${union.id}`);
+            console.log(`User ${userId} added to union ${union.id} as admin.`);
 
             if (!options.transaction) {
               await transaction.commit();
             }
-          } catch (e) {
-            console.error("Error in afterCreate hook:", e);
+          } catch (error) {
+            console.error('Error in afterCreate hook:', error);
             if (!options.transaction) {
               await transaction.rollback();
             }
