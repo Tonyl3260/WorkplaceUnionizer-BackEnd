@@ -58,4 +58,36 @@ const login = async (req, res) => {
     }
 };
 
-module.exports = { login, signup }
+const me = async (req, res) => {
+    try {
+      const { token } = req.headers; // Get Firebase token from request headers
+  
+      if (!token) {
+        return res.status(400).json({ error: 'Authorization token is required.' });
+      }
+  
+      // Verify the Firebase ID token
+      const decodedToken = await admin.auth().verifyIdToken(token);
+      const uid = decodedToken.uid;
+  
+      // Fetch the user from the database using the UID from Firebase
+      const existingUser = await user.findOne({ where: { uid } });
+  
+      if (!existingUser) {
+        return res.status(404).json({ error: 'User not found.' });
+      }
+  
+      return res.status(200).json({
+        id: existingUser.uid,
+        email: existingUser.email,
+        displayName: existingUser.displayName,
+        createdAt: existingUser.createdAt,
+        updatedAt: existingUser.updatedAt,
+      });
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      res.status(500).json({ error: 'Internal server error.' });
+    }
+  };
+
+module.exports = { login, signup, me }

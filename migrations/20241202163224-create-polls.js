@@ -1,12 +1,13 @@
 'use strict';
+
 module.exports = {
-  async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('polls', {
+  up: async (queryInterface, Sequelize) => {
+    await queryInterface.createTable('poll', {
       id: {
         type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
         allowNull: false,
         primaryKey: true,
-        defaultValue: Sequelize.UUIDV4, 
       },
       name: {
         type: Sequelize.STRING,
@@ -16,14 +17,25 @@ module.exports = {
         type: Sequelize.TEXT,
         allowNull: true,
       },
-      options: {
-        type: Sequelize.ARRAY(Sequelize.STRING), 
+      yesCount: {
+        type: Sequelize.INTEGER,
         allowNull: false,
+        defaultValue: 0,
+      },
+      noCount: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+      },
+      totalEmployees: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
       },
       isActive: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
-        defaultValue: true, 
+        defaultValue: true,
       },
       unionId: {
         type: Sequelize.UUID,
@@ -36,17 +48,19 @@ module.exports = {
         onUpdate: 'CASCADE',
       },
       createdAt: {
-        allowNull: false,
         type: Sequelize.DATE,
+        allowNull: false,
+        defaultValue: Sequelize.NOW,
       },
       updatedAt: {
-        allowNull: false,
         type: Sequelize.DATE,
+        allowNull: false,
+        defaultValue: Sequelize.NOW,
       },
     });
   },
 
-  async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('polls');
+  down: async (queryInterface, Sequelize) => {
+    await queryInterface.dropTable('poll');
   },
 };

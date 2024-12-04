@@ -19,9 +19,9 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'unionId',
         as: 'formQuestions',
       });
-      union.hasMany(models.poll, {
+      union.hasMany(models.Poll, {
         foreignKey: 'unionId',
-        as: 'polls',
+        as: 'Poll',
       });
     }
   }
@@ -99,20 +99,20 @@ module.exports = (sequelize, DataTypes) => {
 
             console.log(`General chat created for workplace1: ${union.name}`);
 
-            // Create a default poll for the union
-            await Poll.create(
-              {
-                id: uuidv4(),
-                name: `Poll for ${union.name}`,
-                unionId: union.id,
-                description: "Poll to unionize.",
-                options: ["yes", "no"], 
-                isActive: true,
-              },
-              { transaction }
-            );
+            // // Create a default poll for the union
+            // await Poll.create(
+            //   {
+            //     id: uuidv4(),
+            //     name: `Poll for ${union.name}`,
+            //     unionId: union.id,
+            //     description: "Poll to unionize.",
+            //     options: ["yes", "no"], 
+            //     isActive: true,
+            //   },
+            //   { transaction }
+            // );
 
-            console.log(`Poll created for union: ${union.name}`);
+            // console.log(`Poll created for union: ${union.name}`);
 
             // Associate the user with the union as admin
             await UserUnion.create(
