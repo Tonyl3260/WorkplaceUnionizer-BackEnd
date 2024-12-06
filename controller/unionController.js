@@ -1,3 +1,4 @@
+const { Model } = require('sequelize');
 const pool = require('../db');
 const { user_union, union, chat } = require('../models');
 const userUnion = require('../models/user-union');
@@ -78,6 +79,10 @@ const getUserUnions = async (req, res) => {
     const chats = await chat.findAll({
       where: {
         unionId: userUnion.dataValues.unionId
+      },
+      include: {
+        model: keyVersion,
+        attributes: ['vCount']
       }
     })
     curr.dataValues.chats = chats.map((chat) => chat.dataValues)

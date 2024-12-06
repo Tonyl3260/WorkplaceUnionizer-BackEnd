@@ -86,19 +86,6 @@ module.exports = (sequelize, DataTypes) => {
 
             console.log(`General chat created for union: ${union.name}`);
 
-            await Chat.create(
-              {
-                id: uuidv4(),
-                name: `${union.name} workplace 1 chat`,
-                unionId: union.id,
-                isDefault: true,
-                isPublic: true,
-              },
-              { transaction, userId, pubkeyValue }
-            );
-
-            console.log(`General chat created for workplace1: ${union.name}`);
-
             // Create a default poll for the union
             await Poll.create(
               {
@@ -106,7 +93,7 @@ module.exports = (sequelize, DataTypes) => {
                 name: `Poll for ${union.name}`,
                 unionId: union.id,
                 description: "Poll to unionize.",
-                options: ["yes", "no"], 
+                options: ["yes", "no"],
                 isActive: true,
               },
               { transaction }

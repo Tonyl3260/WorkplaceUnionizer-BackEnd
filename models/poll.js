@@ -29,7 +29,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
       },
       options: {
-        type: DataTypes.ARRAY(DataTypes.STRING), 
+        type: DataTypes.ARRAY(DataTypes.STRING),
         allowNull: false,
       },
       isActive: {
@@ -39,6 +39,7 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
     {
+
       sequelize,
       modelName: 'poll',
       tableName: 'polls',

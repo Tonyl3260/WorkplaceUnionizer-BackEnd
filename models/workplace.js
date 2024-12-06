@@ -1,6 +1,6 @@
 'use strict';
-const { Model } = require('sequelize');
-
+const { Model, UUIDV4 } = require('sequelize');
+const { v4: uuidv4 } = require('uuid')
 module.exports = (sequelize, DataTypes) => {
   class Workplace extends Model {
     static associate(models) {
@@ -62,6 +62,38 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
     }
   }, {
+    hooks: {
+      afterCreate: async (Workplace, options) => {
+        const { chat, poll } = sequelize.models.chat;
+        const newWorkplaceChat = chat.create({
+          id: uuidv4(),
+          name: Workplace.workplaceName + 'general chat',
+          unionId: options.unionId,
+          chatKeyVersion: null,
+          isDefault: true,
+          isPublic: false
+        })
+        const newAnouncementChat = chat.create({
+          id: uuidv4(),
+          name: "Anouncements",
+          unionId: options.unionId,
+          chatKeyVersion: null,
+          isDefault: true,
+          isPublic: false
+        })
+        const newWorkplacePoll = await poll.create(
+          {
+            id: uuidv4(),
+            name: `Poll for ${Workplace.workplaceNamename}`,
+            unionId: union.id,
+            description: "Poll to unionize.",
+            options: ["yes", "no"],
+            isActive: true,
+          },
+          {}
+        );
+      }
+    },
     sequelize,
     modelName: 'workplace',
   });
