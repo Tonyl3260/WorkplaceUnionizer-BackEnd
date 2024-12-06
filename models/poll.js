@@ -2,9 +2,9 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-  class poll extends Model {
+  class Poll extends Model {
     static associate(models) {
-      poll.belongsTo(models.union, {
+      Poll.belongsTo(models.union, {
         foreignKey: 'unionId',
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE',
@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
 
-  poll.init(
+  Poll.init(
     {
       id: {
         type: DataTypes.UUID,
@@ -28,9 +28,20 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.TEXT,
         allowNull: true,
       },
-      options: {
-        type: DataTypes.ARRAY(DataTypes.STRING), 
+      yesCount: {
+        type: DataTypes.INTEGER,
         allowNull: false,
+        defaultValue: 0,
+      },
+      noCount: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+      },
+      totalEmployees: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
       },
       isActive: {
         type: DataTypes.BOOLEAN,
@@ -40,10 +51,10 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: 'poll',
+      modelName: 'Poll',
       tableName: 'polls',
     }
   );
 
-  return poll;
+  return Poll;
 };

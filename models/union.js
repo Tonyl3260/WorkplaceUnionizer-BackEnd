@@ -19,9 +19,9 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'unionId',
         as: 'formQuestions',
       });
-      union.hasMany(models.poll, {
+      union.hasMany(models.Poll, {
         foreignKey: 'unionId',
-        as: 'polls',
+        as: 'Poll',
       });
     }
   }
