@@ -1,12 +1,17 @@
 require('dotenv').config({ path: `${process.cwd()}/.env` })
-const { Server } = require('socket.io')
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const pool = require('./db');
-const socketIo = require('socket.io');
 const http = require('http');
 const socketInit = require("./socket/index")
+
+const app = express();
+app.use(express.json());
+app.use(cors());
+
+const server = http.createServer(app);
+const port = process.env.PORT || 5000;
 
 // ROUTERS
 const unionRouter = require('./route/unionRoute')
@@ -16,15 +21,18 @@ const chatRouter = require('./route/chatRoute')
 const formRoute = require('./route/formRoute');
 const workplaceRoutes = require('./route/workplaceRoute');
 const inviteRoutes = require("./route/inviteRoute");
-const app = express();
-app.use(express.json());
-app.use(cors());
+const pollRoute = require('./route/pollRoute');
 
-
-const server = http.createServer(app);
-
-const port = process.env.PORT || 5000;
-
+// routes starting with
+app.use('/union', unionRouter);
+app.use('/users', userRouter);
+app.use('/messages', messageRouter)
+app.use('/chat', chatRouter)
+app.use('/form', formRoute);
+app.use('/workplace', workplaceRoutes);
+app.use("/api/invites", inviteRoutes);
+app.use('/uploads', express.static('uploads'));
+app.use('/polls', pollRoute);
 
 app.post('/', async (req, res) => {
   try {
@@ -57,17 +65,6 @@ app.post('/', async (req, res) => {
     return res.status(500).json({ error: 'An error occurred during login' });
   }
 });
-
-// Use the unionRouter for all routes starting with /union
-app.use('/union', unionRouter);
-app.use('/users', userRouter);
-app.use('/messages', messageRouter)
-app.use('/chat', chatRouter)
-app.use('/form', formRoute);
-app.use('/workplace', workplaceRoutes);
-app.use("/api/invites", inviteRoutes);
-
-app.use('/uploads', express.static('uploads'));
 
 // Catch-all 404 route
 app.use('*', (req, res, next) => {
