@@ -23,8 +23,8 @@ const createUnion = async (req, res) => {
             });
         }
 
-        // Retrieve image path if uploaded
-        const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
+        // Generate the full image URL if an image is uploaded
+        const imagePath = req.file ? `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}` : null;
 
         let parsedWorkplaces;
         if (typeof workplaces === 'string') {
@@ -33,7 +33,7 @@ const createUnion = async (req, res) => {
             } catch (error) {
                 console.error("Error parsing workplaces JSON:", error);
                 return res.status(400).json({
-                    message: "Invalid workplaces format.",
+                    message: "Invalid workplaces format."
                 });
             }
         } else {
@@ -45,7 +45,7 @@ const createUnion = async (req, res) => {
             name,
             description,
             visibility,
-            image: imagePath, // Store the uploaded image path
+            image: imagePath, // Store the full image URL
         }, {
             userId
         });
@@ -71,11 +71,11 @@ const createUnion = async (req, res) => {
         console.error('Error creating union:', error);
         return res.status(500).json({
             status: "error",
-            message: "Union creation failed."
+            message: "Union creation failed.",
         });
     }
 };
 
 module.exports = {
-    createUnion
+    createUnion,
 };
