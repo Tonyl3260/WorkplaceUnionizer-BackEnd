@@ -1,6 +1,8 @@
+
 const {
     union,
-    workplace
+    workplace,
+    sequelize
 } = require('../models');
 const {
     v4: uuidv4
@@ -39,14 +41,16 @@ const createUnion = async (req, res) => {
         } else {
             parsedWorkplaces = workplaces;
         }
-
+        const unionId = uuidv4()
+        const transaction = await sequelize.transaction()
         const newUnion = await union.create({
-            id: uuidv4(),
+            id: unionId,
             name,
             description,
             visibility,
             image: imagePath, // Store the uploaded image path
         }, {
+            transaction,
             userId
         });
 
@@ -59,9 +63,9 @@ const createUnion = async (req, res) => {
             };
 
             // Insert the workplace record into the database
-            await workplace.create(workplaceData);
+            await workplace.create(workplaceData, { transaction, userId, unionId });
         }
-
+        await transaction.commit()
         return res.status(201).json({
             status: "success",
             id: newUnion.id,

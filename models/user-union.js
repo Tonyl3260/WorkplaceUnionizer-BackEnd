@@ -24,6 +24,12 @@ module.exports = (sequelize, DataTypes) => {
     }
 
     userUnion.init({
+        id: {
+            type: DataTypes.UUID,
+            allowNull: false,
+            primaryKey: true,
+            defaultValue: DataTypes.UUIDV4
+        },
         userId: {
             type: DataTypes.STRING,
             allowNull: false,
@@ -41,28 +47,41 @@ module.exports = (sequelize, DataTypes) => {
         hooks: {
             afterCreate: async (user_union, options) => {
                 const { chat, user_chat, pubkey } = sequelize.models
+                const transaction = options.transaction
+                console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+                console.log("user_union")
                 try {
+                    let publicChatInstances = []
+                    let userPubkey = null
                     if (!user_union.unionId) { throw new Error("unionId is missing") }
-                    const publicChatInstances = await chat.findAll({
-                        where: {
-                            unionId: user_union.unionId,
-                            isPublic: true
-                        },
-                    })
-                    const userPubkey = await pubkey.findOne({
-                        where: {
-                            userId: user_union.userId
-                        }
-                    })
+                    try {
+                        publicChatInstances = await chat.findAll({
+                            where: {
+                                unionId: user_union.unionId,
+                                isPublic: true
+                            },
+                        }, { transaction })
+                    } catch (error) {
+                        console.error("There was an error trying to find public chat instances, Check user-union.js", error)
+                    }
+                    try {
+                        userPubkey = await pubkey.findOne({
+                            where: {
+                                userId: user_union.userId
+                            }
+                        }, { transaction })
+                    } catch (error) {
+                        console.error("There was an error trying to find public key for user, Check user-union.js", error)
+
+                    }
                     for (const publicChat of publicChatInstances) {
-                        if (!publicChat.dataValues.id) {
-                            console.log("NOT GRABBING chatId PROPERLY: ", publicChat.dataValues);
+                        if (!publicChat || !publicChat.dataValues.id) {
+                            console.log("NOT GRABBING chatId PROPERLY: ", publicChat ? publicChat.dataValues : publicChat);
                             continue; // Skip this chat
                         }
 
-                        if (!userPubkey.dataValues.value) {
-                            console.log("NOT GRABBING pubkey PROPERLY: ", userPubkey)
-                            console.log("No users found for chat:", publicChat.dataValues.chatId);
+                        if (!userPubkey || !userPubkey.dataValues.value) {
+                            console.log("NOT GRABBING pubkey PROPERLY: ", userPubkey);
                             continue; // Skip this chat
                         }
 
@@ -73,7 +92,7 @@ module.exports = (sequelize, DataTypes) => {
                                 userId: user_union.userId,
                                 pubkeyValue: userPubkey.value,
                                 role: 'general',
-                            });
+                            }, { transaction });
 
                             console.log(
                                 `User chat instance created for user: ${user_union.userId}`,
@@ -85,6 +104,7 @@ module.exports = (sequelize, DataTypes) => {
                             );
                         }
                     }
+
                 } catch (error) {
                     console.log('There wwas an error creating user chat instance', error)
                 }

@@ -9,6 +9,12 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE',
       });
+      chat.belongsTo(models.workplace, {
+        foreignKey: 'workplaceId',
+        as: 'workplace',
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      })
       // Users participating in the chat
       chat.belongsToMany(models.pubkey, {
         through: 'userChats',
@@ -39,6 +45,11 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.UUID,
         allowNull: false,
       },
+      workplaceId: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        defaultValue: null
+      },
       chatKeyVersion: {
         type: DataTypes.UUID,
         allowNull: true, // Allow null for backward compatibility
@@ -68,13 +79,9 @@ module.exports = (sequelize, DataTypes) => {
               role: 'admin',
               pubkeyValue: options.pubkeyValue,
             }, { transaction });
-
             console.log(`User-Chat association created:`, newUserChat);
           } catch (error) {
             console.error('Error in Chat afterCreate hook:', error);
-            if (options.transaction) {
-              await options.transaction.rollback();
-            }
           }
         },
       },

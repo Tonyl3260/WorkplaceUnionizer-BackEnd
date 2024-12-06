@@ -7,7 +7,7 @@ const {
 
 const router = require('express').Router();
 
-router.get('/getWorkplaces', getWorkplacesByUnionId);
+router.get('/getWorkplaces', getWorkplaces);
 
 router.post('/create', createWorkplace);
 
