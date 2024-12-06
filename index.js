@@ -13,7 +13,6 @@ const unionRouter = require('./route/unionRoute')
 const userRouter = require('./route/userRoute')
 const messageRouter = require('./route/messageRoute')
 const chatRouter = require('./route/chatRoute')
-const searchRoute = require('./route/searchRoute');
 const formRoute = require('./route/formRoute');
 const workplaceRoutes = require('./route/workplaceRoute');
 const inviteRoutes = require("./route/inviteRoute");
@@ -64,7 +63,6 @@ app.use('/union', unionRouter);
 app.use('/users', userRouter);
 app.use('/messages', messageRouter)
 app.use('/chat', chatRouter)
-app.use('/api', searchRoute);
 app.use('/form', formRoute);
 app.use('/workplace', workplaceRoutes);
 app.use("/api/invites", inviteRoutes);
