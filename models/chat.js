@@ -81,7 +81,7 @@ module.exports = (sequelize, DataTypes) => {
               role: 'admin',
               pubkeyValue: options.pubkeyValue,
             }, { transaction });
-            console.log(`User-Chat association created:`, newUserChat);
+            console.log(`User-Chat association created:`);
           } catch (error) {
             console.error('Error in Chat afterCreate hook:', error);
           }
