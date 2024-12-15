@@ -1,5 +1,5 @@
 const socket = require("socket.io");
-
+const { user_union } = require('../models')
 // Global variables
 global.rooms = new Map();
 global.onlineUsers = new Map();
@@ -26,7 +26,7 @@ const addUser = (user, roomId, socketId) => {
     user.socketId = socketId;
     roomUsers.push(user);
     global.rooms.set(roomId, roomUsers);
-    global.onlineUsers.set(socketId, user);
+
 };
 
 const removeUser = (socketId) => {
@@ -46,7 +46,6 @@ const removeUser = (socketId) => {
     }
 
     // Remove the user from the global.onlineUsers Map
-    global.onlineUsers.delete(socketId);
 
     return { success: true, userRemoved: user };
 };
@@ -58,7 +57,6 @@ const socketInit = (server) => {
 
     io.on("connection", (socket) => {
         console.log("A user connected:", socket.id);
-
         socket.on("join_room", (user, room) => {
             addUser(user, room.room.id, socket.id);
 
@@ -75,11 +73,39 @@ const socketInit = (server) => {
             console.log("Message received:", msg);
             io.in(room.room.id).emit("RECEIVED_MSG", msg);
         });
-        socket.on("union_join_notification", (unionId) => {
-            socket.emit()
+        socket.on("union_join_notification", async (unionId, userId) => {
+            try {
+                console.log(unionId, userId)
+                const adminInstance = await user_union.findOne({
+                    where: {
+                        unionId,
+                        role: 'admin'
+                    }
+                })
+                const adminId = adminInstance.dataValues.userId
+                const socketId = global.onlineUsers.get(adminId);
+                const notification = {
+                    type: "union join",
+                    unionId,
+                    sender: userId,
+                    receiver: adminId
+                }
+                if (socketId) {
+                    io.to(socketId).emit('user_join_request_notificiation', notification)
+                    console.log(`Notification sent to user ${userId}:`, notification);
+                }
+                else {
+                    console.log(`User ${userId} is not connected.`);
+                }
+            }
+            catch (e) {
+                console.error("There was an error getting adminINstance \n", e)
+            }
+
         })
         socket.on("disconnect", () => {
             console.log("A user disconnected:", socket.id);
+            global.onlineUsers.delete(socketId);
 
             // Remove the user from global variables
             const result = removeUser(socket.id);

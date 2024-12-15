@@ -77,7 +77,7 @@ const getChatMessages = async (req, res) => {
                 }
 
             }
-            console.log(messages)
+
         }
         res.status(200).json({ message: "messages received successfully", data: { messages, keys } })
 
