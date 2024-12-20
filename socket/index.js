@@ -57,6 +57,10 @@ const socketInit = (server) => {
 
     io.on("connection", (socket) => {
         console.log("A user connected:", socket.id);
+        socket.on("user_connected", (user) => {
+            global.onlineUsers.set(socket.id, user)
+            console.log(`User added to online users: ${user}, SocketId: ${socket.id}`)
+        })
         socket.on("join_room", (user, room) => {
             addUser(user, room.room.id, socket.id);
 
@@ -105,7 +109,7 @@ const socketInit = (server) => {
         })
         socket.on("disconnect", () => {
             console.log("A user disconnected:", socket.id);
-            global.onlineUsers.delete(socketId);
+            global.onlineUsers.delete(socket.id);
 
             // Remove the user from global variables
             const result = removeUser(socket.id);
