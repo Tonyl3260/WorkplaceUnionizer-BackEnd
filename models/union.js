@@ -70,7 +70,8 @@ module.exports = (sequelize, DataTypes) => {
           chat: Chat,
           user_union: UserUnion,
           poll: Poll,
-          pubkey: Pubkey
+          pubkey: Pubkey,
+          user: User,
         } = sequelize.models;
 
         try {
@@ -92,6 +93,15 @@ module.exports = (sequelize, DataTypes) => {
             throw new Error("Admin public key not found");
           }
           const pubkeyValue = adminPubkey.dataValues.value;
+
+          const adminUser = await User.findOne(
+            {
+              where: { uid: userId },
+              attributes: ['displayName'], 
+            },
+            { transaction }
+          );
+          const displayName = adminUser?.displayName || "Unknown Admin"; 
 
           try {
             // Create general chats for the union
@@ -137,6 +147,7 @@ module.exports = (sequelize, DataTypes) => {
               userId,
               role: "admin",
               unionId: union.id,
+              displayName,
             }, {
               transaction
             });

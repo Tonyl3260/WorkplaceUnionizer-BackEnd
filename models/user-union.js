@@ -36,7 +36,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.UUID,
             allowNull: false,
         },
-
+        displayName: { 
+            type: DataTypes.STRING,
+            allowNull: true,
+          },
     }, {
         hooks: {
             afterCreate: async (user_union, options) => {

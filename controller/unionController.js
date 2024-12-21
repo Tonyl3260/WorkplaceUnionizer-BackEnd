@@ -98,7 +98,8 @@ const joinUnion = async (req, res) => {
       id: uuidv4(),
       userId: userUnionInfo.userId,
       role: userUnionInfo.role,
-      unionId: userUnionInfo.unionId
+      unionId: userUnionInfo.unionId,
+      displayName: userUnionInfo.displayName
     })
     res.status(200).json({ message: "joined successfully", data: joined.dataValues })
   } catch (error) {
